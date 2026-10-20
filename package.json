@@ -1,0 +1,8 @@
+{
+  "name": "hill-run",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test src/physics.test.js"
+  }
+}
