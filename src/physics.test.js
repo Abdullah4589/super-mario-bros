@@ -5,10 +5,10 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { isStomp, moveX, moveY } from "./collision.js";
 import { DIFFICULTIES, nextDifficulty, stageTime } from "./difficulty.js";
-import { createEntity, nextShellState } from "./entities.js";
+import { createEntity, nextShellState, updateEnemy } from "./entities.js";
 import { addCoin, flagScore } from "./hud.js";
 import { canWarp, nextStage, parseLevel } from "./level.js";
-import { createPlayer, jumpApex, startJump, stepHorizontal, stepVertical } from "./player.js";
+import { MAX_RUN, MAX_WALK, createPlayer, jumpApex, startJump, stepHorizontal, stepVertical } from "./player.js";
 import { ACTORS } from "./sprites.js";
 import { TILE, applyBump, isSolidCell, solidAt } from "./tiles.js";
 
@@ -62,8 +62,22 @@ test("run speed stays within the run cap", () => {
   const player = createPlayer(0, 0);
   player.grounded = true;
   for (let frame = 0; frame < 80; frame += 1) stepHorizontal(player, { right: true, run: true });
-  assert.ok(player.vx > 2);
-  assert.ok(player.vx <= 2.41);
+  assert.ok(player.vx > MAX_RUN - 0.05);
+  assert.ok(player.vx <= MAX_RUN + 0.01);
+});
+
+test("hoppers stay slower than a hard-mode player and jump when grounded", () => {
+  const level = load("1-1");
+  for (const type of ["walker", "shell", "hopper", "boss"]) {
+    const enemy = createEntity({ type, x: 8, y: 15 });
+    assert.ok(enemy.speed > 0, type);
+    assert.ok(enemy.speed * DIFFICULTIES.hard.enemyScale < MAX_WALK, type);
+  }
+  const hopper = createEntity({ type: "hopper", x: 8, y: 15 });
+  hopper.grounded = true;
+  hopper.hopCd = 1;
+  updateEnemy(hopper, level);
+  assert.ok(hopper.vy < 0);
 });
 
 test("stomps count only while falling onto an enemy", () => {
@@ -182,6 +196,7 @@ test("stages are rectangular, reachable, and wired together", () => {
     } else {
       assert.ok(findCell(level, "|"), id);
     }
+    if (!secret) assert.ok(level.entities.some((enemy) => enemy.type === "hopper"), id);
   }
 });
 

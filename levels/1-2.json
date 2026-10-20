@@ -8,6 +8,11 @@
   },
   "entities": [
     {
+      "type": "hopper",
+      "x": 12,
+      "y": 15
+    },
+    {
       "type": "walker",
       "x": 22,
       "y": 15
@@ -15,6 +20,11 @@
     {
       "type": "shell",
       "x": 28,
+      "y": 15
+    },
+    {
+      "type": "walker",
+      "x": 34,
       "y": 15
     },
     {

@@ -126,7 +126,7 @@ export function startGame(canvas, input = createInput(), audio = createAudio()) 
   function defeatEnemy(enemy, score) {
     if (!enemy.alive) return;
     enemy.alive = false;
-    enemy.squish = enemy.type === "walker" ? 14 : 0;
+    enemy.squish = enemy.type === "walker" || enemy.type === "hopper" ? 14 : 0;
     state.session.score += score;
     floater(score, enemy.x, enemy.y);
     audio.stomp();
@@ -569,8 +569,11 @@ export function startGame(canvas, input = createInput(), audio = createAudio()) 
         const cx = wrap(i * 210 - cam.x * 0.2, VIEW_W + 140) - 30;
         const cy = 40 + (i % 3) * 16;
         ctx.fillStyle = theme.cloud;
-        ctx.fillRect(cx, cy, 26, 8);
-        ctx.fillRect(cx + 8, cy - 6, 16, 8);
+        ctx.beginPath();
+        ctx.ellipse(cx + 16, cy + 4, 20, 8, 0, 0, Math.PI * 2);
+        ctx.ellipse(cx + 28, cy + 1, 13, 9, 0, 0, Math.PI * 2);
+        ctx.ellipse(cx + 6, cy + 3, 11, 7, 0, 0, Math.PI * 2);
+        ctx.fill();
       }
     }
     for (let i = 0; i < 7; i += 1) {
@@ -585,7 +588,7 @@ export function startGame(canvas, input = createInput(), audio = createAudio()) 
   function drawWorld() {
     const { level, player } = state;
     const theme = THEMES[level.theme] || THEMES.overworld;
-    const focus = player.x + player.w / 2 + player.facing * 24;
+    const focus = player.x + player.w / 2 + player.facing * 36;
     const cam = cameraFor(level, focus, VIEW_W, VIEW_H);
     drawBackground(theme, cam);
     ctx.save();
@@ -623,7 +626,9 @@ export function startGame(canvas, input = createInput(), audio = createAudio()) 
     }
     for (const bit of state.particles) {
       ctx.fillStyle = bit.color;
-      ctx.fillRect(bit.x, bit.y, 4, 4);
+      ctx.beginPath();
+      ctx.arc(bit.x + 2, bit.y + 2, 2.1, 0, Math.PI * 2);
+      ctx.fill();
     }
 
     const flicker = player.invuln > 0 && player.star <= 0 && Math.floor(state.frame / 2) % 2 === 0;
@@ -651,7 +656,8 @@ export function startGame(canvas, input = createInput(), audio = createAudio()) 
   }
 
   function draw() {
-    ctx.imageSmoothingEnabled = false;
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
     ctx.clearRect(0, 0, VIEW_W, VIEW_H);
     if (state.mode === "error") {
       ctx.fillStyle = "#1a120e";
@@ -705,10 +711,22 @@ export function startGame(canvas, input = createInput(), audio = createAudio()) 
   }
 
   function drawTitle() {
-    ctx.fillStyle = "#79c6ff";
+    const sky = ctx.createLinearGradient(0, 0, 0, VIEW_H);
+    sky.addColorStop(0, "#8ecfff");
+    sky.addColorStop(0.72, "#c5ebff");
+    sky.addColorStop(1, "#e7f8ef");
+    ctx.fillStyle = sky;
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
-    ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
-    ctx.fillRect(70, 48, 340, 170);
+    ctx.fillStyle = "#3c9a52";
+    ctx.beginPath();
+    ctx.ellipse(90, VIEW_H + 8, 120, 46, 0, 0, Math.PI * 2);
+    ctx.ellipse(250, VIEW_H + 14, 150, 50, 0, 0, Math.PI * 2);
+    ctx.ellipse(410, VIEW_H + 6, 130, 46, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "rgba(14, 24, 36, 0.55)";
+    ctx.beginPath();
+    ctx.roundRect(64, 42, 352, 184, 16);
+    ctx.fill();
     const title = "HILL RUN";
     drawText(ctx, title, Math.round((VIEW_W - textWidth(title, 3)) / 2), 64, "#f7fbff", 3);
     const sub = "PIPE HILLS";

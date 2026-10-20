@@ -3,7 +3,7 @@ import { groundAhead, moveX, moveY } from "./collision.js";
 import { GRAVITY, MAX_FALL } from "./player.js";
 import { ACTORS } from "./sprites.js";
 
-const SPEED = { walker: 0.6, shell: 0.5, boss: 0.4 };
+const SPEED = { walker: 0.6, shell: 0.5, boss: 0.4, hopper: 0.6 };
 
 export function createEntity(spec) {
   const sprite = ACTORS[spec.type];
@@ -28,6 +28,7 @@ export function createEntity(spec) {
     squish: 0,
     kickGrace: 0,
     falling: false,
+    hopCd: 48,
   };
 }
 
@@ -70,7 +71,7 @@ export function updateEnemy(enemy, level) {
     return { fell: enemy.y > level.height * TILE + 8 };
   }
 
-  const patrol = enemy.type === "boss" || (enemy.type === "shell" && enemy.state === "walk");
+  const patrol = enemy.type === "boss" || enemy.type === "hopper" || (enemy.type === "shell" && enemy.state === "walk");
   if (patrol && enemy.grounded && !groundAhead(level, enemy)) enemy.dir *= -1;
 
   if (enemy.type === "shell" && enemy.state === "still") enemy.vx = 0;
@@ -79,6 +80,15 @@ export function updateEnemy(enemy, level) {
 
   const hitWall = enemy.vx !== 0 && moveX(enemy, level);
   if (hitWall) enemy.dir *= -1;
+
+  // Hop only while there is still floor ahead, so a jump cannot carry them off a ledge.
+  if (enemy.type === "hopper" && enemy.grounded && groundAhead(level, enemy)) {
+    enemy.hopCd -= 1;
+    if (enemy.hopCd <= 0) {
+      enemy.vy = -5.2;
+      enemy.hopCd = 84;
+    }
+  }
 
   enemy.vy = Math.min(MAX_FALL, enemy.vy + GRAVITY);
   moveY(enemy, level);

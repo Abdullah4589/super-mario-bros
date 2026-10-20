@@ -56,6 +56,29 @@ const small = stack(HEAD, "...ttttttttt....", 6, LEGS, PAL);
 const superBody = stack(HEAD, "...ttttttttt....", 22, LEGS, PAL);
 const fireBody = stack(HEAD, "...ccccccccc....", 22, LEGS, { ...PAL, t: "#ef7a32", d: "#b4531a" });
 
+const hopper = exact(
+  [
+    "................",
+    "................",
+    "....rrrrrr......",
+    "...rrrrrrrr.....",
+    "..rrryyryyrr....",
+    "..rrrrrrrrrr....",
+    "...rccccccr.....",
+    "..rrrrrrrrrr....",
+    "...rrrrrrrr.....",
+    "..kk......kk....",
+    ".kk........kk...",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+  ],
+  PAL,
+  16,
+);
+
 const walker = exact(
   [
     "................",
@@ -227,6 +250,7 @@ export const ACTORS = {
   super: superBody,
   fire: fireBody,
   walker: trimVertical(walker),
+  hopper: trimVertical(hopper),
   shell: trimVertical(shell),
   mushroom: trimVertical(mushroom),
   life: trimVertical(life),
@@ -255,6 +279,12 @@ export function blit(ctx, sprite, x, y, { flip = false, spark = -1 } = {}) {
 export function drawActor(ctx, name, box, options) {
   const sprite = ACTORS[name];
   if (!sprite) return;
+  if (name !== "fireball") {
+    ctx.fillStyle = "rgba(16, 22, 30, 0.18)";
+    ctx.beginPath();
+    ctx.ellipse(box.x + box.w / 2, box.y + box.h - 1, Math.max(3, box.w * 0.32), 1.7, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
   const x = box.x + (box.w - sprite.w) / 2;
   const y = box.y + box.h - sprite.h;
   blit(ctx, sprite, x, y, options);
@@ -346,7 +376,13 @@ export function drawTile(ctx, cell, x, y, theme, frame) {
   if (cell === "C") {
     const wide = Math.floor(frame / 8 + x) % 2 === 0;
     ctx.fillStyle = "#f2c14e";
-    ctx.fillRect(x + (wide ? 4 : 6), y + 4, wide ? 8 : 4, 8);
+    ctx.beginPath();
+    ctx.ellipse(x + 8, y + 8, wide ? 5 : 3.2, 4.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "rgba(255, 248, 220, 0.7)";
+    ctx.beginPath();
+    ctx.ellipse(x + 6.5, y + 6.5, wide ? 1.6 : 1, 1.2, 0, 0, Math.PI * 2);
+    ctx.fill();
     return;
   }
 }

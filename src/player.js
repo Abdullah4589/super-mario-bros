@@ -2,11 +2,11 @@ export const GRAVITY = 0.62;
 export const JUMP_GRAVITY = 0.32;
 export const JUMP_V = -7.2;
 export const MAX_FALL = 7;
-export const ACCEL_WALK = 0.08;
-export const ACCEL_RUN = 0.14;
-export const MAX_WALK = 1.35;
-export const MAX_RUN = 2.4;
-export const FRICTION = 0.1;
+export const ACCEL_WALK = 0.09;
+export const ACCEL_RUN = 0.16;
+export const MAX_WALK = 1.52;
+export const MAX_RUN = 2.7;
+export const FRICTION = 0.12;
 export const PLAYER_W = 12;
 
 export function playerHeight(form) {
